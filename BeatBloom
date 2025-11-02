@@ -10,15 +10,15 @@ Minim minim;       // The main sound engine that runs Minim
 AudioInput mic;    // Real-time microphone input
 FFT fft;           // The Fast Fourier Transform—splits sound into frequency bands to analyse bass specifically.
 
-float t = 0; // time variable. Makes the visuals switch over each frame. 
+float t = 0; // time variable. Makes the visuals switch over each frame and make the animation. 
 float smoothingFactor = 0.25; // FFT audio analysis smoothing, less jumpy reactions to sound (Houben, 2021)
 
 void setup() {
   size(1200, 1000, P2D); // large canvas using the P2D renderer for better visual performance
   
   // STARTING UP MINIM AND AUDIO ANALYSIS (Processing, 2019)
-  minim = new Minim(this);
-  mic = minim.getLineIn(Minim.MONO, 1024); // get live audio from the mic, only ONE channel with a 1024 buffer size 
+  minim = new Minim(this); //Creating a minim object connected to the sketch
+  mic = minim.getLineIn(Minim.MONO, 1024); // getting live audio from the mic, only ONE (Mono) channel with a 1024 buffer size 
   fft = new FFT(mic.bufferSize(), mic.sampleRate()); // FFT algorithm that matches the mic input
 
   // SETTING UP THE COLOURS
@@ -28,7 +28,7 @@ void setup() {
 
 void draw() {  // draw() runs continuously 
   // MOTION TRAILING TRIPPY EFFECT
-  // Using a transparent black rectangle makes the previous frames slightly visible when continoulsy changing. Creates the illusion of a trailing motion. 
+  // Using a transparent black rectangle makes the previous frames slightly visible when continoulsy changing. Creates the illusion of a trailing motion when using the alpha value)
   fill(0, 0, 0, 25);
   rect(0, 0, width, height);
 
@@ -36,19 +36,20 @@ void draw() {  // draw() runs continuously
   fft.forward(mic.mix); // Analyse the mic mono sound through frequencies
 
   // the first ~10% of frequency bands is what  is going to be analysed (low frequencies = bass)
+  // Variables below for analysing bass 
   float bass = 0; //start bass value at 0 because it will add up over time
   int bassRange = fft.specSize() / 10; // only picks up on lower frequency 
 
   for (int i = 0; i < bassRange; i++) {
-    bass += fft.getBand(i); // add the amplitude (energy level) from each frequency band
+    bass += fft.getBand(i); // adding the amplitude (energy level) from each frequency band
   }
 
-  bass /= bassRange; // Averaging out the frequencies so it’s a smoother value
+  bass /= bassRange; // Averaging out the frequencies so it’s a smoother WHOLE value otherwise it would be too choppy
 
   // MAPPING/MATCHING BASS TO THE VISUALS
   float amp = map(bass, 0, 50, 0, 700);   // Maps the bass value number (0–50 range) to something much visually larger (0–700 pixels)
 
-  translate(width/2, height/2); // Ensuring every drawing originates from the centre of the canvas to create the blooming effect.
+  translate(width/2, height/2); // Ensuring every drawing starts from the centre of the canvas to create the Bloom effect
 
 
   // GRID OF CIRCLES 
@@ -63,8 +64,8 @@ void draw() {  // draw() runs continuously
       float n = noise(nx, ny + t * 0.1); // Noise offset based on time
 
       // SWIRLING MOTION
-      // atan2() gets angle of the current point from the center
-      // sqrt(x*x + y*y) gives distance from the center
+      // atan2() calculates the angle of the current point from the center
+      // sqrt(x*x + y*y) gives distance from the center of the canvas
       float angle = atan2(y, x) + t * 0.01; // adds rotation over time for subtle swirl
       float radius = sqrt(x*x + y*y) + sin(n * PI * 2 + t * 1) * amp; // makes radius pulse with bass
 
@@ -73,10 +74,10 @@ void draw() {  // draw() runs continuously
       float py = sin(angle) * radius;
 
       // COLOURS OF CIRCLES
-      // Each circle will change colours over time and react to bass
-      // frameCount makes it shift, noise makes it vary per circle, amp adds a bass kick
+      // Each circle will shift colours over time and react to bass.  Each circle has it's own colour which is based on the frame count, perlin noise and bass energy/amp    
+      // frameCount makes it shift, noise makes it VARY per circle, amp adds a bass pulse to the animation
       float hue = (frameCount * 2 + noise(nx, ny) * 200 + amp * 0.5) % 360; //using nx and ny because n and y was too jittery on the screen—too big
-      fill(hue, 100, 100, 90); // bright, saturated colors with slight transparency (blends nicely)
+      fill(hue, 100, 100, 90);
 
       // CIRCLE SIZE
       // grows and shrinks with bass, plus small variation from noise
@@ -88,14 +89,14 @@ void draw() {  // draw() runs continuously
   }
 
   // BRIGHT/STROBE EFFECT ON STRONG BASS
-  // When the bass is strong enough, the visual flashes which gives a dramatic visual pop during big beats or drops
+  // When the bass is energetic enoug the visual flashes- good for drops 
   if (amp > 300) {
     fill((frameCount * 2) % 360, 100, 100, 40); // bright hue that changes over time
     rect(-width/2, -height/2, width, height);   // full-screen flash centered
   }
 
   // UPDATED TIME VARIABLE
-  // stronger bass = quicker visuals
+  // stronger bass = faster visuals
   t += 0.02 + amp / 1000;
 }
 
