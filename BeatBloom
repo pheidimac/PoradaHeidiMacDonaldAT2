@@ -5,7 +5,7 @@
 import ddf.minim.*;           // imports Minim sound library
 import ddf.minim.analysis.*;  // imports the analysis tools (e.g., FFT for frequency analysis)
 
-// SETTING UP AUDIO ELEMENTS (Processing.org, n.d)
+// SETTING UP AUDIO ELEMENTS (Processing, 2019)
 Minim minim;       // The main sound engine that runs Minim
 AudioInput mic;    // Real-time microphone input
 FFT fft;           // The Fast Fourier Transform—splits sound into frequency bands to analyse bass specifically.
@@ -16,7 +16,7 @@ float smoothingFactor = 0.25; // FFT audio analysis smoothing, less jumpy reacti
 void setup() {
   size(1200, 1000, P2D); // large canvas using the P2D renderer for better visual performance
   
-  // STARTING UP MINIM AND AUDIO ANALYSIS (Processing.org, n.d)
+  // STARTING UP MINIM AND AUDIO ANALYSIS (Processing, 2019)
   minim = new Minim(this);
   mic = minim.getLineIn(Minim.MONO, 1024); // get live audio from the mic, only ONE channel with a 1024 buffer size 
   fft = new FFT(mic.bufferSize(), mic.sampleRate()); // FFT algorithm that matches the mic input
@@ -99,6 +99,7 @@ void draw() {  // draw() runs continuously
   t += 0.02 + amp / 1000;
 }
 
-//References in Chronological Order
-//
-// https://processing.org/reference/libraries/sound/index.html 
+//References 
+// Processing. (2019b). Sound \ Libraries \ Processing.org. Processing.org. https://processing.org/reference/libraries/sound/index.html
+// Houben, K. (2021, January 23). Using Processing for Music Visualization. Generative Hut. https://www.generativehut.com/post/using-processing-for-music-visualization?utm
+
